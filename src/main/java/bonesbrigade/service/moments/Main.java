@@ -2,10 +2,7 @@ package bonesbrigade.service.moments;
 
 import kafka.serializer.StringDecoder;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.Optional;
-import org.apache.spark.api.java.function.Function3;
 import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.State;
 import org.apache.spark.streaming.StateSpec;
 import org.apache.spark.streaming.api.java.JavaMapWithStateDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
@@ -43,30 +40,10 @@ public class Main {
                 topicsSet
         );
 
-        Function3<String, Optional<String>, State<Aggregate>, Tuple2<Double, Double>> mappingFunction = (category, value, state) -> {
-            Aggregate aggregate;
-            if (state.exists()) {
-                aggregate = state.get();
-            } else {
-                aggregate = new Aggregate();
-            }
-            double val = 0.0;
+        MomentsProcessor processor = new MomentsProcessor();
 
-            if (value.isPresent()) {
-                val = Double.parseDouble(value.get());
-            }
-            int count = 1 + aggregate.count;
-            double delta = val - aggregate.mean;
-            double mean = aggregate.mean + delta / (double) count;
-            double delta2 = val - mean;
-            double squaredDistance = aggregate.squaredDistance + delta * delta2;
-            Aggregate newAggregate = new Aggregate(count, mean, squaredDistance);
-            state.update(newAggregate);
-            return new Tuple2<>(mean, squaredDistance/(double)count);
+        JavaMapWithStateDStream<String, String, Aggregate, Tuple2<Double, Double>> aggregateStream = messages.mapWithState(StateSpec.function(processor::processFunction));
 
-        };
-
-        JavaMapWithStateDStream<String, String, Aggregate, Tuple2<Double, Double>> aggregateStream = messages.mapWithState(StateSpec.function(mappingFunction));
         aggregateStream.foreachRDD((values) -> values.foreach(e -> System.out.println("Mean = " + e._1.toString() + ", Variance = " + e._2.toString())));
 
         // Start the computation
