@@ -1,6 +1,8 @@
 package bonesbrigade.service.moments;
 
-public class Aggregate {
+import java.io.Serializable;
+
+public class Aggregate implements Serializable {
 
     final int count;
     final double mean;
