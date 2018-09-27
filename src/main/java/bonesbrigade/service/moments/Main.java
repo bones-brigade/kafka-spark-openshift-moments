@@ -19,10 +19,8 @@ import java.util.HashSet;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("Hello World!");
 
-
-        SparkConf sparkConf = new SparkConf().setAppName("JavaDirectKafkaWordCount").setMaster("local[*]");
+        SparkConf sparkConf = new SparkConf().setAppName("KafkaMoments").setMaster("local[*]");
         JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(2));
         jssc.sparkContext().setLogLevel("ERROR");
 
