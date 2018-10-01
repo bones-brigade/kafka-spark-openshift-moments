@@ -5,10 +5,8 @@ import org.apache.spark.api.java.function.MapGroupsWithStateFunction;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.catalyst.encoders.RowEncoder;
-import org.apache.spark.sql.streaming.OutputMode;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
-import org.apache.spark.sql.streaming.Trigger;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import scala.Tuple3;
@@ -34,6 +32,7 @@ public class Main {
                 .format("kafka")
                 .option("kafka.bootstrap.servers", BROKER)
                 .option("subscribe", TOPIC)
+                .option("failOnDataLoss", false)
                 .load()
                 .select(functions.column("key"), functions.column("value").cast(DataTypes.StringType).alias("value"));
 
@@ -60,31 +59,32 @@ public class Main {
                         aggregate = new Tuple3<>(count, mean, squaredDistance);
                     }
                     groupState.update(aggregate);
-
-                    return RowFactory.create(aggregate._2(), aggregate._3() / (double) aggregate._1());
+                    Double variance = aggregate._3() / (double) aggregate._1();
+                    return RowFactory.create("{\"mean\":" + aggregate._2().toString() + ", \"variance\":" + variance.toString() + "}");
                 };
 
         StructType structType = new StructType();
-        structType = structType.add("mean", DataTypes.DoubleType, false);
-        structType = structType.add("variance", DataTypes.DoubleType, false);
+        structType = structType.add("value", DataTypes.StringType, false);
 
         ExpressionEncoder<Row> encoder = RowEncoder.apply(structType);
 
-        Dataset<Row> sessionUpdates = records.groupByKey((MapFunction<Row, String>) row -> row.getString(0), Encoders.STRING())
+        Dataset<Row> momentUpdates = records.groupByKey((MapFunction<Row, String>) row -> row.getString(0), Encoders.STRING())
                 .mapGroupsWithState(stateUpdateFunc, Encoders.tuple(Encoders.INT(), Encoders.DOUBLE(), Encoders.DOUBLE()), encoder);
 
 
         /* configure the output stream */
-        StreamingQuery query = sessionUpdates.writeStream()
-                .outputMode(OutputMode.Update())
-                .format("console")
-                .option("truncate", false)
-                .trigger(Trigger.ProcessingTime(1000))
+        StreamingQuery writer = momentUpdates
+                .writeStream()
+                .format("kafka")
+                .outputMode("update")
+                .option("kafka.bootstrap.servers", BROKER)
+                .option("topic", "bones-brigade-mean-moments")
+                .option("checkpointLocation", "/tmp")
                 .start();
 
         /* begin processing the input and output topics */
         try {
-            query.awaitTermination();
+            writer.awaitTermination();
         } catch (StreamingQueryException e) {
             spark.log().error("Exception while waiting for query to end {}.", e.getMessage(), e);
         }
