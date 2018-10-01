@@ -13,10 +13,10 @@ import scala.Tuple3;
 
 public class Main {
 
-    private static final String BROKER = "localhost:9092";
-    private static final String TOPIC = "bones-brigade";
-
     public static void main(String[] args) {
+        final String brokers = System.getenv("KAFKA_BROKERS");
+        final String intopic = System.getenv("KAFKA_IN_TOPIC");
+        final String outtopic = System.getenv("KAFKA_OUT_TOPIC");
 
         SparkSession spark = SparkSession
                 .builder()
@@ -30,8 +30,8 @@ public class Main {
         Dataset<Row> records = spark
                 .readStream()
                 .format("kafka")
-                .option("kafka.bootstrap.servers", BROKER)
-                .option("subscribe", TOPIC)
+                .option("kafka.bootstrap.servers", brokers)
+                .option("subscribe", intopic)
                 .option("failOnDataLoss", false)
                 .load()
                 .select(functions.column("key"), functions.column("value").cast(DataTypes.StringType).alias("value"));
@@ -77,8 +77,8 @@ public class Main {
                 .writeStream()
                 .format("kafka")
                 .outputMode("update")
-                .option("kafka.bootstrap.servers", BROKER)
-                .option("topic", "bones-brigade-mean-moments")
+                .option("kafka.bootstrap.servers", brokers)
+                .option("topic", outtopic)
                 .option("checkpointLocation", "/tmp")
                 .start();
 
