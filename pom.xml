@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>bonesbrigade</groupId>
-    <artifactId>kafka-java-moments</artifactId>
+    <artifactId>kafka-spark-openshift-moments</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <properties>

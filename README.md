@@ -1,9 +1,9 @@
-# kafka-java-moments
+# kafka-spark-openshift-moments
 
 This repository contains code to deploy an example stream transformation microservice (MS). It will introduce several concepts, such as [Apache Spark](https://spark.apache.org/)'s [Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html), stateful stream transformation and Kappa architecture.
 The streaming engine is assumed to be [Apache Kafka](https://kafka.apache.org/) and all of the following instructions are geared towards a deployment on [OpenShift](https://www.openshift.com/).
 
-The MS will read a Kafka topic, which we will call `input`, perform the online estimation of the mean and variance for the data seen so far, and write the current estimates to a topic named `output`.
+The MS will read a Kafka topic, which we will call `input`, perform the online estimation [1] of the mean and variance [2] for the data seen so far, and write the current estimates to a topic named `output`.
 
 ## Setup
 
@@ -82,3 +82,8 @@ INFO:root:received: {"mean":49.84284685796561, "variance":852.7573660391838}
 INFO:root:received: {"mean":49.841336760925415, "variance":852.6795046398067}
 [...]
 ```
+---
+[1] - The mean and variance are estimated using the well-known Welford's method, presented in Welford, B. P. _"Note on a method for calculating corrected sums of squares and products."_ Technometrics 4, no. 3 (1962): 419-420.
+
+[2] - Note about [moments](https://en.wikipedia.org/wiki/Moment_(mathematics)).
+
