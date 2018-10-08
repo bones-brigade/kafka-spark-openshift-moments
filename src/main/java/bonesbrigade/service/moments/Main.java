@@ -20,11 +20,8 @@ public class Main {
 
         SparkSession spark = SparkSession
                 .builder()
-                .master("local[*]")
-                .appName("KafkaSparkOpenShiftJava")
+                .appName("KafkaJavaMoments")
                 .getOrCreate();
-
-        spark.sparkContext().setLogLevel("ERROR");
 
         /* configure the operations to read the input topic */
         Dataset<Row> records = spark

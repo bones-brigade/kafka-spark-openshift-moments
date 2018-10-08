@@ -16,7 +16,7 @@ $ oc new-app strimzi
 
 This will install an ephemeral Kafka cluster on OpenShift (the deployment might take a minute).
 
-Next we install the radanalytics.io tooling to help you deploy Apache Spark clusters. This is done by running:
+Next we install the [radanalytics.io](https://radanalytics.io/) tooling to help you deploy Apache Spark clusters. This is done by running:
 
 ```
 oc create -f https://radanalytics.io/resources.yaml
