@@ -42,8 +42,8 @@ To install the actual stream transformation microservice, simply run
 
 ```
 oc new-app --template oshinko-java-spark-build-dc \
-    -p APPLICATION_NAME=skeleton \
-    -p GIT_URI=https://github.com/ruivieira/kafka-java-moments \
+    -p APPLICATION_NAME=moments \
+    -p GIT_URI=https://github.com/bones-brigade/kafka-java-moments \
     -p APP_MAIN_CLASS=bonesbrigade.service.moments.Main \
     -p SPARK_OPTIONS='--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.3.0 --conf spark.jars.ivy=/tmp/.ivy2' \
     -e KAFKA_BROKERS=kafka:9092 \
