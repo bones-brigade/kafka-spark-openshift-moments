@@ -20,7 +20,7 @@ public class Main {
 
         SparkSession spark = SparkSession
                 .builder()
-                .appName("KafkaJavaMoments")
+                .appName("KafkaSparkOpenshiftMoments")
                 .getOrCreate();
 
         /* configure the operations to read the input topic */
