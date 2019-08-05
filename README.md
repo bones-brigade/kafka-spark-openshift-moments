@@ -1,4 +1,4 @@
-# kafka-spark-openshift-moments
+# kafka-spark-java-moments
 
 This repository contains code to deploy an example stream transformation microservice (MS). It will introduce several concepts, such as [Apache Spark](https://spark.apache.org/)'s [Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html), stateful stream transformation and Kappa architecture.
 The streaming engine is assumed to be [Apache Kafka](https://kafka.apache.org/) and all of the following instructions are geared towards a deployment on [OpenShift](https://www.openshift.com/).
